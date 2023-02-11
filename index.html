@@ -5,8 +5,39 @@
         <title>Pretty keypairs for nostr</title>
     </head>
     <body>
-        <p>Enter a word you want to use as the public key's prefix</p>
-        <input id="prefix" type="text" value="n0str">
+        <script src="./wasm_exec.js"></script>
+        <script>
+            const go = new Go();
+            let mod, inst;
+            WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+                mod = result.module;
+                inst = result.instance;
+                document.getElementById("run").disabled = false;
+            });
+
+            async function run(){
+                console.clear();
+                await go.run(inst);
+                inst = await WebAssembly.instantiate(mod, go.importObject);
+            }
+        </script>
+        <div id="input-area">
+            <p>Enter a word you want to use as the public key's prefix, then press RUN.</p>
+            <input id="input" type="text" value="n0str">
+            <button onclick="run()" id="run" disabled>RUN</button>
+        </div>
+        <div id="output-area">
+            <div>
+                <label for="public">Public key:</label>
+                <input id="public" type="text" value="">
+                <button>Copy</button>
+            </div>
+            <div>
+                <label for="private">Private key:</label>
+                <input id="private" type="password" value="">
+                <button>Copy</button>
+            </div>
+        </div>
     </body>
 </html>
 
