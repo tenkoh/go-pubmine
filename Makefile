@@ -13,8 +13,8 @@ all: main.wasm serve
 	GOOS=js GOARCH=wasm go build -o "$@" "$<"
 
 serve:
-	$(BROWSER) 'http://localhost:5000'
-	serve || (go get -v github.com/mattn/serve && serve)
+	$(BROWSER) 'http://localhost:8080'
+	serve -a localhost:8080 || (go install github.com/mattn/serve@latest && serve -a localhost:8080)
 
 clean:
 	rm -f *.wasm
