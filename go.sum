@@ -1,2 +1,4 @@
 github.com/mattn/serve v0.0.2 h1:/oIWtvyhATJnonb+49BsU0Rm2QpmnVqIVKSzImjT42o=
 github.com/mattn/serve v0.0.2/go.mod h1:z5UCscwT0oZEC5yiEu6rOu6MNWYOe184WjcZZxpFqb8=
+golang.org/x/sync v0.1.0 h1:wsuoTGHzEhffawBOhz5CYhcrV4IdKZbEyZjBMuTp12o=
+golang.org/x/sync v0.1.0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
