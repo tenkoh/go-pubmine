@@ -17,7 +17,7 @@ import (
 var (
 	maxTrial   = 1000000
 	maxWorkers = int64(runtime.NumCPU())
-	bech32     = regexp.MustCompile("^[02-9ac-hj-np-z]$")
+	bech32     = regexp.MustCompile("^[02-9ac-hj-np-z]+$")
 )
 
 type keyPair struct {

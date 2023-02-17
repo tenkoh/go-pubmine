@@ -2,9 +2,11 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Pretty keypairs for nostr</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alvaromontoro/almond.css@latest/dist/almond.lite.min.css" />
+        <link rel="stylesheet" href="theme.css">
+        <title>Pretty keypairs generator for nostr</title>
     </head>
-    <body>
+    <body class="global-layout">
         <script src="./wasm_exec.js"></script>
         <script>
             const go = new Go();
@@ -12,32 +14,57 @@
             WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
                 mod = result.module;
                 inst = result.instance;
-                document.getElementById("run").disabled = false;
             });
 
-            async function run(){
+            const generateKey = async () => {
                 console.clear();
+                document.getElementById("public").value = "";
+                document.getElementById("private").value = "";
                 await go.run(inst);
                 inst = await WebAssembly.instantiate(mod, go.importObject);
             }
+
+            const copyToClip = async (id) => {
+                const elem = document.getElementById(id)
+                try{
+                    await navigator.clipboard.writeText(elem.value);
+                }catch(err){
+                    alert("Failed to copy: ", err)
+                }
+            }
         </script>
-        <div id="input-area">
-            <p>Enter a word you want to use as the public key's prefix, then press RUN.</p>
-            <input id="input" type="text" value="n0str">
-            <button onclick="run()" id="run" disabled>RUN</button>
-        </div>
-        <div id="output-area">
-            <div>
+        <main class="global-layout__contents">
+            <h1>Pretty Keypair Generator for Nostr</h1>
+            <h2>What's this app?</h2>
+            <ul>
+                <li>Generate a keypair whose public key has the specified prefix.</li>
+                <li><b>It's safe! </b>All processes are done on your local PC. </li>
+            </ul>
+            <h2>Input</h2>
+            <ul>
+                <li>Enter a prefix into the form below, then hit "RUN". </li>
+                <li><b>NOTE: </b>You can NOT use 1, b, i, o in the prefix.</li>
+            </ul>
+            <form id="input-form" class="form-layout">
+                <label for="input">Prefix:</label>
+                <input id="input" type="text" value="" placeholder="ex) n0str" required pattern="^[02-9ac-hj-np-z]+$">
+                <button type="button" onclick="generateKey()" id="run">RUN</button>
+            </form>
+            <h2>Output</h2>
+            <form class="form-layout">
                 <label for="public">Public key:</label>
-                <input id="public" type="text" value="">
-                <button>Copy</button>
-            </div>
-            <div>
+                <input id="public" type="text">
+                <button type="button" onclick="copyToClip('public')">Copy</button>
+            </form>
+            <form class="form-layout">
                 <label for="private">Private key:</label>
-                <input id="private" type="password" value="">
-                <button>Copy</button>
-            </div>
-        </div>
+                <input id="private" type="password">
+                <button type="button" onclick="copyToClip('private')">Copy</button>
+            </form>
+        </main>
+        <footer class="global-layout__footer">
+            <p>@tenkoh / <a href="https://github.com/tenkoh/pretty-nostr">Source of this app</a></p>
+        </footer>
     </body>
 </html>
 

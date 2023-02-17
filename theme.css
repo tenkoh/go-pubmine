@@ -1,0 +1,53 @@
+:root{
+    --heading-margin: 1rem 0 0.5rem;
+}
+
+.global-layout{
+    display: grid;
+    grid-template: "contents" 1fr "footer" auto/100%;
+    min-height: 100vh;
+    place-content: center;
+    place-items: center;
+}
+
+.global-layout__contents{
+    grid-area: contents;
+    display: grid;
+    place-content: center;
+    place-items: center;
+    gap: 5px;
+}
+
+.global-layout__footer{
+    grid-area: footer;
+}
+
+form:invalid button{
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+form.form-layout{
+    width: 100%;
+    max-width: 960px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 5px;
+}
+
+form.form-layout label{
+    justify-self: end;
+}
+
+form.form-layout button{
+    justify-self: start;
+}
+
+form.form-layout input{
+    justify-self: center;
+}
+
+ul {
+    margin: 0.2rem 0rem 0.2rem 0rem;
+}
