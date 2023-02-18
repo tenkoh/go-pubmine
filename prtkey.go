@@ -28,17 +28,14 @@ func (e ErrInitializeGenerator) Error() string {
 	return fmt.Sprintf("Failed to initialize a keypair generator: %s: your input is %s", e.cause, e.userInput)
 }
 
-type ErrExceedMaxTrial struct {
-	maxTrial int
-}
+type ErrInterrupted struct{}
 
-func (e ErrExceedMaxTrial) Error() string {
-	return fmt.Sprintf("No keypairs found in %d trials", e.maxTrial)
+func (e ErrInterrupted) Error() string {
+	return "Operation was interrupted"
 }
 
 // Generator is a type to configurate the operation setting.
 type Generator struct {
-	maxTrial   int
 	maxWorkers int64
 	prefix     string
 }
@@ -52,27 +49,25 @@ type KeyPair struct {
 
 // NewGenerator is a factory function of Generator.
 // The argument "prefix" must be bech32 format.
-func NewGenerator(prefix string, maxTrial int, maxWorkers int64) (*Generator, error) {
+func NewGenerator(prefix string, maxWorkers int64) (*Generator, error) {
 	if !bech32.MatchString(prefix) {
 		return nil, ErrInitializeGenerator{"bad format prefix", prefix}
 	}
 	g := Generator{
 		prefix:     npubPrefix + prefix,
-		maxTrial:   maxTrial,
 		maxWorkers: maxWorkers,
 	}
 	return &g, nil
 }
 
 // Mine tries to mine a keypair whose public key contains
-// the specified prefix. If no keypairs are found in
-// maxTrial, ErrExceedMaxTrial is returned.
+// the specified prefix.
 func (g *Generator) Mine(ctx context.Context) (*KeyPair, error) {
 	sem := semaphore.NewWeighted(g.maxWorkers)
 	ctx, cancel := context.WithCancel(ctx)
 	ckp := make(chan *KeyPair)
 	go func() {
-		for i := 0; i < g.maxTrial; i++ {
+		for {
 			if err := sem.Acquire(ctx, 1); err != nil {
 				return
 			}
@@ -87,21 +82,18 @@ func (g *Generator) Mine(ctx context.Context) (*KeyPair, error) {
 				}
 			}()
 		}
-		// wait until all goroutines finish, then cancel
-		if err := sem.Acquire(ctx, g.maxWorkers); err != nil {
-			return
-		}
-		cancel() // send ctx.Done() to the select block below
 	}()
 
 	var kp *KeyPair
 	var ok bool
 	select {
 	case kp, ok = <-ckp:
-		cancel()
+		// when a keypair found, stop the goroutines with cancel below
 	case <-ctx.Done():
+		// cancel from the paretn context
 		ok = false //this is equivalent to pass
 	}
+	cancel()
 	// close channel after all running workers finish
 	// if this waiting process takes a long time,
 	// consider to isolate it in another goroutine.
@@ -109,7 +101,7 @@ func (g *Generator) Mine(ctx context.Context) (*KeyPair, error) {
 	close(ckp)
 
 	if !ok {
-		return nil, ErrExceedMaxTrial{g.maxTrial}
+		return nil, ErrInterrupted{}
 	}
 	return kp, nil
 }

@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	maxTrial   = 1000000
 	maxWorkers = int64(runtime.NumCPU())
 )
 
