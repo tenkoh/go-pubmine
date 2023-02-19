@@ -14,15 +14,8 @@
             WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
                 mod = result.module;
                 inst = result.instance;
+                go.run(inst);
             });
-
-            const generateKey = async () => {
-                console.clear();
-                document.getElementById("public").value = "";
-                document.getElementById("private").value = "";
-                await go.run(inst);
-                inst = await WebAssembly.instantiate(mod, go.importObject);
-            }
 
             const copyToClip = async (id) => {
                 const elem = document.getElementById(id)
@@ -48,8 +41,9 @@
             <form id="input-form" class="form-layout">
                 <label for="input">Prefix:</label>
                 <input id="input" type="text" value="" placeholder="ex) n0str" required pattern="^[02-9ac-hj-np-z]+$">
-                <button type="button" onclick="generateKey()" id="run">RUN</button>
+                <button id="run"type="button" onclick="generateKeypair()">RUN</button>
             </form>
+            <button id="cancel" type="button" hidden>Cancel</button>
             <h2>Output</h2>
             <form class="form-layout">
                 <label for="public">Public key:</label>
