@@ -39,11 +39,27 @@ func TestNewGenerator(t *testing.T) {
 
 func TestMine(t *testing.T) {
 	// just test the logic is not broken
-	g, err := pubmine.NewGenerator("n0st", int64(runtime.NumCPU()))
+	g, err := pubmine.NewGenerator("n0s", int64(runtime.NumCPU()))
 	if err != nil {
 		t.Fatal(err)
 	}
 	kp, err := g.Mine(context.Background())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("%+v\n", kp)
+}
+
+func TestSimpleMineWithCancel(t *testing.T) {
+	// just test the logic is not broken
+	g, err := pubmine.NewGenerator("n0str", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
+	defer cancel()
+	kp, err := g.SimpleMine(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return

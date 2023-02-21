@@ -28,9 +28,7 @@ func mine(this js.Value, args []js.Value) any {
 	if err != nil {
 		return map[string]any{"error": fmt.Sprintf("failed to initialize a miner: %s", err.Error())}
 	}
-
-	ctx := context.Background()
-	kp, err := g.Mine(ctx)
+	kp, err := g.SimpleMine(context.Background())
 	if err != nil {
 		return map[string]any{"error": fmt.Sprintf("failed to mine a keypair: %s", err.Error())}
 	}

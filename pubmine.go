@@ -109,6 +109,27 @@ func (g *Generator) Mine(ctx context.Context) (*KeyPair, error) {
 	return kp, nil
 }
 
+// SimpleMine disables concurrent process.
+// This method is expected to be used in single thread environment like WebAssembly.
+func (g *Generator) SimpleMine(ctx context.Context) (*KeyPair, error) {
+LOOP:
+	for {
+		select {
+		case <-ctx.Done():
+			break LOOP
+		default:
+		}
+		kp, err := genKeyPair()
+		if err != nil {
+			continue
+		}
+		if strings.HasPrefix(kp.Public, g.prefix) {
+			return kp, nil
+		}
+	}
+	return nil, ErrInterrupted{}
+}
+
 func genKeyPair() (*KeyPair, error) {
 	sk := nostr.GeneratePrivateKey()
 	pk, err := nostr.GetPublicKey(sk)
