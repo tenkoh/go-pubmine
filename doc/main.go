@@ -7,50 +7,38 @@ package main
 import (
 	"context"
 	"fmt"
-	"runtime"
 	"syscall/js"
 
 	"github.com/tenkoh/go-pubmine"
 )
 
-var (
-	maxWorkers = int64(runtime.NumCPU())
-)
+// No concurrency in wasm.
+// Deletegate it to JavaScript with WebWorker.
+const maxWorkers = 1
 
-func generateKeypair(this js.Value, inputs []js.Value) any {
-	fmt.Println("wasm called")
-	// get elements
-	doc := js.Global().Get("document")
-	input := doc.Call("getElementById", "input")
-	public := doc.Call("getElementById", "public")
-	private := doc.Call("getElementById", "private")
+func mine(this js.Value, args []js.Value) any {
+	// args contains at least one element even if no arguments passed from JS.
+	// In the case above, the argument is undefined.
+	if args[0].IsUndefined() {
+		return map[string]any{"error": "argument is required"}
+	}
 
-	go func() {
-		prefix := input.Get("value").String()
-		g, err := pubmine.NewGenerator(prefix, maxWorkers)
-		if err != nil {
-			// error output into public form
-			public.Set("value", "The specified prefix is bad format.")
-			return
-		}
+	prefix := args[0].String()
+	g, err := pubmine.NewGenerator(prefix, maxWorkers)
+	if err != nil {
+		return map[string]any{"error": fmt.Sprintf("failed to initialize a miner: %s", err.Error())}
+	}
 
-		ctx := context.Background()
-		kp, err := g.Mine(ctx)
-		if err != nil {
-			// error output into public form
-			public.Set("value", "No keypairs found")
-			return
-		}
+	ctx := context.Background()
+	kp, err := g.Mine(ctx)
+	if err != nil {
+		return map[string]any{"error": fmt.Sprintf("failed to mine a keypair: %s", err.Error())}
+	}
 
-		public.Set("value", kp.Public)
-		private.Set("value", kp.Private)
-
-	}()
-	return nil
+	return map[string]any{"public": kp.Public, "private": kp.Private}
 }
 
 func main() {
-	fmt.Println("wasm loaded")
-	js.Global().Set("generateKeypair", js.FuncOf(generateKeypair))
+	js.Global().Set("mine", js.FuncOf(mine))
 	select {}
 }

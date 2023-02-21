@@ -17,6 +17,18 @@
                 go.run(inst);
             });
 
+            const generateKeypair = () => {
+                const prefix = document.getElementById("input").value;
+                const ret = mine(prefix)
+                // error
+                if (ret.hasOwnProperty("error")){
+                    alert(ret.error);
+                }else{
+                    document.getElementById("public").value = ret.public;
+                    document.getElementById("private").value = ret.private;
+                }
+            }
+
             const copyToClip = async (id) => {
                 const elem = document.getElementById(id)
                 try{
