@@ -51,7 +51,7 @@ type KeyPair struct {
 // The argument "prefix" must be bech32 format.
 func NewGenerator(prefix string, maxWorkers int64) (*Generator, error) {
 	if !bech32.MatchString(prefix) {
-		return nil, ErrInitializeGenerator{"bad format prefix", prefix}
+		return nil, ErrInitializeGenerator{"bad format prefix. 1, b, i, o are not allowed.", prefix}
 	}
 	g := Generator{
 		prefix:     npubPrefix + prefix,

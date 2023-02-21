@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"syscall/js"
 
-	"github.com/tenkoh/go-prtkey"
+	"github.com/tenkoh/go-pubmine"
 )
 
 var (
@@ -27,7 +27,7 @@ func generateKeypair(this js.Value, inputs []js.Value) any {
 
 	go func() {
 		prefix := input.Get("value").String()
-		g, err := prtkey.NewGenerator(prefix, maxWorkers)
+		g, err := pubmine.NewGenerator(prefix, maxWorkers)
 		if err != nil {
 			// error output into public form
 			public.Set("value", "The specified prefix is bad format.")
