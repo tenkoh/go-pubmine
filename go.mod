@@ -1,4 +1,4 @@
-module github.com/tenkoh/go-prtkey
+module github.com/tenkoh/go-pubmine
 
 go 1.19
 

@@ -1,4 +1,4 @@
-package prtkey
+package pubmine
 
 import (
 	"context"

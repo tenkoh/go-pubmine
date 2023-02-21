@@ -1,4 +1,4 @@
-package prtkey_test
+package pubmine_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tenkoh/go-prtkey"
+	"github.com/tenkoh/go-pubmine"
 )
 
 func TestNewGenerator(t *testing.T) {
@@ -28,7 +28,7 @@ func TestNewGenerator(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := tt.args
-			_, err := prtkey.NewGenerator(a.prefix, a.maxWorkers)
+			_, err := pubmine.NewGenerator(a.prefix, a.maxWorkers)
 			hasError := err != nil
 			if hasError != tt.wantError {
 				t.Errorf("want %t, got %t", tt.wantError, hasError)
@@ -39,7 +39,7 @@ func TestNewGenerator(t *testing.T) {
 
 func TestMine(t *testing.T) {
 	// just test the logic is not broken
-	g, err := prtkey.NewGenerator("n0st", int64(runtime.NumCPU()))
+	g, err := pubmine.NewGenerator("n0st", int64(runtime.NumCPU()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestMine(t *testing.T) {
 
 func TestMineWithCancel(t *testing.T) {
 	// just test the logic is not broken
-	g, err := prtkey.NewGenerator("n0st", int64(runtime.NumCPU()))
+	g, err := pubmine.NewGenerator("n0st", int64(runtime.NumCPU()))
 	if err != nil {
 		t.Fatal(err)
 	}
