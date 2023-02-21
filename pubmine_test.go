@@ -57,7 +57,7 @@ func TestMineWithCancel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
 	defer cancel()
 	kp, err := g.Mine(ctx)
 	if err != nil {
