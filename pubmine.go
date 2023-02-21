@@ -90,14 +90,17 @@ func (g *Generator) Mine(ctx context.Context) (*KeyPair, error) {
 	case kp, ok = <-ckp:
 		// when a keypair found, stop the goroutines with cancel below
 	case <-ctx.Done():
-		// cancel from the paretn context
+		// cancel from the parent context
 		ok = false //this is equivalent to pass
 	}
+	// terminate producer
 	cancel()
 	// close channel after all running workers finish
-	// if this waiting process takes a long time,
-	// consider to isolate it in another goroutine.
-	sem.Acquire(ctx, g.maxWorkers)
+	for {
+		if sem.TryAcquire(g.maxWorkers) {
+			break
+		}
+	}
 	close(ckp)
 
 	if !ok {
