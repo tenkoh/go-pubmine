@@ -8,51 +8,6 @@
     </head>
     <body class="global-layout">
         <script src="./wasm_exec.js"></script>
-        <script>
-            const workers = [];
-            const threads = navigator.hardwareConcurrency;
-            const maxWorkers = threads > 1 ? threads - 1 : threads;
-            for(let i=0; i<maxWorkers; i++){
-                const w = new Worker("mine.js");
-                workers.push(w);
-            }
-            const mine = () => {
-                const btn = document.getElementById("run");
-                btn.disabled = true;
-                const prefix = document.getElementById("input").value;
-                const jobs = [];
-                for(const w of workers){
-                    const promise = new Promise((resolve, reject) => {
-                        w.onmessage = (e) => {
-                            resolve(e.data);
-                        }
-                    })
-                    jobs.push(promise);
-                    w.postMessage(prefix);
-                }
-                Promise.any(jobs).then((result)=>{
-                    console.log(result)
-                    document.getElementById("public").value = result.public;
-                    document.getElementById("private").value = result.private;
-                    for(let [i,w] of workers.entries()){
-                        w.terminate();
-                        w = null;
-                        const nw = new Worker("mine.js");
-                        workers[i] = nw;
-                    }
-                    btn.disabled = false;
-                })
-            }
-
-            const copyToClip = async (id) => {
-                const elem = document.getElementById(id)
-                try{
-                    await navigator.clipboard.writeText(elem.value);
-                }catch(err){
-                    alert("Failed to copy: ", err)
-                }
-            }
-        </script>
         <main class="global-layout__contents">
             <h1>Pretty Keypair Generator for Nostr</h1>
             <h2>What's this app?</h2>
@@ -70,22 +25,87 @@
                 <input id="input" type="text" value="" placeholder="ex) n0str" required pattern="^[02-9ac-hj-np-z]+$">
                 <button id="run"type="button" onclick="mine()">RUN</button>
             </form>
-            <button id="cancel" type="button" hidden>Cancel</button>
             <h2>Output</h2>
             <form class="form-layout">
                 <label for="public">Public key:</label>
                 <input id="public" type="text">
-                <button type="button" onclick="copyToClip('public')">Copy</button>
+                <button type="button" onclick="clip('public')">Copy</button>
             </form>
             <form class="form-layout">
                 <label for="private">Private key:</label>
                 <input id="private" type="password">
-                <button type="button" onclick="copyToClip('private')">Copy</button>
+                <button type="button" onclick="clip('private')">Copy</button>
             </form>
         </main>
+        <dialog id="progress-window" class="modal-window">
+            <progress></progress>
+            <button id="cancel-btn" type="button" onclick="terminate()">cancel</button>
+        </dialog>
         <footer class="global-layout__footer">
-            <p>@tenkoh / <a href="https://github.com/tenkoh/pretty-nostr">Source of this app</a></p>
+            <p>@tenkoh / <a href="https://github.com/tenkoh/go-pubmine" target="_blank">Source of this app</a></p>
         </footer>
+        <script>
+            // initialize workers
+            const workers = [];
+            const threads = navigator.hardwareConcurrency;
+            const maxWorkers = threads > 1 ? threads - 1 : threads;
+            for(let i=0; i<maxWorkers; i++){
+                const w = new Worker("mine.js");
+                workers.push(w);
+            }
+
+            // DOM elements
+            const runBtn = document.getElementById("run");
+            const pw = document.getElementById("progress-window");
+            
+            // functions
+            const terminate = () => {
+                for(let [i,w] of workers.entries()){
+                    w.terminate();
+                    w = null;
+                    const nw = new Worker("mine.js");
+                    workers[i] = nw;
+                }
+                runBtn.disabled = false;
+                pw.close();
+            }
+
+            const mine = () => {
+                runBtn.disabled = true;
+                pw.showModal();
+
+                const pub = document.getElementById("public");
+                const sec = document.getElementById("private");
+                pub.value = "";
+                sec.value = "";
+
+                const prefix = document.getElementById("input").value;
+                const jobs = [];
+                for(const w of workers){
+                    const promise = new Promise((resolve) => {
+                        w.onmessage = (e) => {
+                            resolve(e.data);
+                        }
+                    })
+                    jobs.push(promise);
+                    w.postMessage(prefix);
+                }
+                Promise.any(jobs).then((result)=>{
+                    pub.value = result.public;
+                    sec.value = result.private;
+                    terminate();
+                })
+            }
+
+            const clip = async (id) => {
+                const elem = document.getElementById(id)
+                try{
+                    await navigator.clipboard.writeText(elem.value);
+                }catch(err){
+                    alert("Failed to copy: ", err)
+                }
+            }
+        </script>
     </body>
 </html>
 

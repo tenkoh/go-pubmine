@@ -6,6 +6,7 @@
     display: grid;
     grid-template: "contents" 1fr "footer" auto/100%;
     min-height: 100vh;
+    padding: 0;
     place-content: center;
     place-items: center;
 }
@@ -50,4 +51,12 @@ form.form-layout input{
 
 ul {
     margin: 0.2rem 0rem 0.2rem 0rem;
+}
+
+dialog{
+    gap: 10px;
+}
+
+dialog::backdrop{
+    background-color: rgba(0, 0, 0, 0.4);
 }
