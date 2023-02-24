@@ -43,6 +43,12 @@ nsec1~
 1. Visit https://tenkoh.github.io/go-pubmine
 2. Enter a prefix into the input form, then hit the RUN button.
 
+## Tips
+Reference operation time (with 8 threads):
+- less than four characters: a few seconds
+- five characters: a few miniutes
+- more than six characters: you need to sleep :)
+
 ## License
 MIT
 
